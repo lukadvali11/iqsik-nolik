@@ -13,7 +13,10 @@ export default function Home() {
     }
     
     return (
-        <button onClick={clickHandler}>New Game</button>
+        <div style={{display: "flex", flexDirection: "column", alignItems: "center"}}>
+            <h1 style={{fontSize: "100px", color: "white"}}>IQSIK-NOLIK</h1>
+            <button style={{cursor: "pointer", fontSize: "20px", backgroundColor: "orange", color: "black", padding: "20px 50px"}}onClick={clickHandler}>New Game</button>
+        </div>
     )
 }
 

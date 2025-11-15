@@ -42,8 +42,16 @@ export default function Board({ xIsNext, squares, onPlay, move, id, winner, isFi
   }
 
   return (
-    <>
-      <div className="status">{status}</div>
+    <div style={{
+    width: "400px",
+    height: "400px",
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+     }}>
+      {status.includes("Winner") && (<div style={{color: "green", padding: "10px"}}className="status">{status}</div>)}
+      {status.includes("Next") && (<div style={{color: "white", padding: "10px"}}className="status">{status}</div>)}
+
       <div className="board-row">
         <Square value={squares[0]} onSquareClick={() => handleClick(0)} />
         <Square value={squares[1]} onSquareClick={() => handleClick(1)} />
@@ -59,14 +67,20 @@ export default function Board({ xIsNext, squares, onPlay, move, id, winner, isFi
         <Square value={squares[7]} onSquareClick={() => handleClick(7)} />
         <Square value={squares[8]} onSquareClick={() => handleClick(8)} />
       </div>
-      <div>{statement}</div>
-    </>
+      <div style={{color: "red", padding: "20px"}}>{statement}</div>
+    </div>
   );
 }
 
 export function Square({ value, onSquareClick }) {
   return (
-    <button className="square" onClick={onSquareClick}>
+    <button style={{backgroundColor: "black",
+    color: "white",
+    border: "1.5px solid grey",
+    width: "100px", 
+    height: "100px", 
+    fontSize: "50px",}} 
+    className="square" onClick={onSquareClick}>
       {value === 'N' ? null : value}
     </button>
   );

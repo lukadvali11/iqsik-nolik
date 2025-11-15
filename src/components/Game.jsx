@@ -45,7 +45,7 @@ export default function Game() {
     }
     return (
       <li key={move}>
-        <button onClick={() => jumpTo(move)}>{description}</button>
+        <button style={{width: "130px", padding: "10px",}} onClick={() => jumpTo(move)}>{description}</button>
       </li>
     );
   });
