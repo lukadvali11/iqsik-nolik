@@ -1,28 +1,16 @@
-import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import {useState} from "react";
+import {useParams, useLocation} from "react-router-dom";
 import Board from './Board';
 
 export default function Game() {
   const [isFinished, setIsFinished] = useState(false);
   const [winner, setWinner] = useState('N');
   const [history, setHistory] = useState([Array(9).fill(null)]);
-  const {id, number} = useParams();
-  const [currentMove, setCurrentMove] = useState(number);
+  const {id} = useParams();
+  const {player} = useLocation();
+  const [currentMove, setCurrentMove] = useState(0);
   const xIsNext = currentMove % 2 === 0;
   const currentSquares = history[currentMove];
-
-  useEffect(() => {
-    async function fetchGame() {
-      const response = await fetch(`http://localhost:8080/api/game/${id}`);
-      const game = await response.json();
-      const boards = game.boards.map(board => board.board)
-      setHistory(boards);
-      setIsFinished(game.finished);
-      setWinner(game.winner);
-    }
-
-    fetchGame();
-  }, [])
 
   function handlePlay(nextSquares, isFinished, winner) {
     const nextHistory = [...history.slice(0, currentMove + 1), nextSquares];
@@ -53,9 +41,9 @@ export default function Game() {
   return (
     <div className="game">
       <div className="game-board">
-        <Board xIsNext={xIsNext} 
-        squares={currentSquares} onPlay={handlePlay} move={currentMove} 
-        id={id} winner={winner} isFinished={isFinished}/>
+        <Board player={player} xIsNext={xIsNext}
+               squares={currentSquares} onPlay={handlePlay} move={currentMove}
+               id={id} winner={winner} isFinished={isFinished}/>
       </div>
       <div className="game-info">
         <ol>{moves}</ol>

@@ -1,36 +1,39 @@
-import { useState } from "react";
+import {useEffect, useState} from "react";
+import {useSocket} from "../socket.js";
 
-export default function Board({ xIsNext, squares, onPlay, move, id, winner, isFinished}) {
+export default function Board({player, xIsNext, squares, onPlay, id, winner, isFinished}) {
+  const {socket} = useSocket();
   const [statement, setStatement] = useState(null);
 
-  async function handleClick(i) {
-    if(isFinished) {
-      if(winner === "X" || winner === "O" ) {
+  useEffect(() => {
+    socket.on("move-made", (game) => {
+      onPlay(game.boards[game.boards.length - 1].board, game.isFinished, game.winner)
+    });
+  }, [socket, onPlay]);
+
+  async function handleClick(position) {
+    if (xIsNext !== (player === "X")) {
+      setStatement("It is not your turn");
+      return;
+    }
+    if (isFinished) {
+      if (winner === "X" || winner === "O") {
         setStatement(`Game Is Finished. Winner is: ${winner}`);
       } else {
         setStatement("Game Finished As Draw");
       }
-      return null;
+      return;
     }
 
-    if (squares[i] !== "N"){
-      setStatement(`Position ${i} Is Already Occupied`);
-      return null;
+    if (squares[position] !== "N") {
+      setStatement(`Position ${position} Is Already Occupied`);
+      return;
     }
 
     if (statement) {
       setStatement(null);
     }
-    const response = await fetch(`http://localhost:8080/api/game/${id}?move=${++move}&position=${i}`, {
-      method: 'PUT',
-      });
-    const updatedGame = await response.json();
-    console.log(updatedGame);
-    isFinished = updatedGame.finished;
-    winner = updatedGame.winner;
-    console.log(isFinished, winner);
-    const nextSquares = updatedGame.boards[updatedGame.boards.length - 1].board;
-    onPlay(nextSquares, isFinished, winner);
+    socket.emit("make-move", id, position);
   }
 
   const winnerSymbol = calculateWinner(squares);
@@ -43,44 +46,46 @@ export default function Board({ xIsNext, squares, onPlay, move, id, winner, isFi
 
   return (
     <div style={{
-    width: "400px",
-    height: "400px",
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-     }}>
-      {status.includes("Winner") && (<div style={{color: "green", padding: "10px"}}className="status">{status}</div>)}
-      {status.includes("Next") && (<div style={{color: "white", padding: "10px"}}className="status">{status}</div>)}
+      width: "400px",
+      height: "400px",
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+    }}>
+      {status.includes("Winner") && (<div style={{color: "green", padding: "10px"}} className="status">{status}</div>)}
+      {status.includes("Next") && (<div style={{color: "white", padding: "10px"}} className="status">{status}</div>)}
 
       <div className="board-row">
-        <Square value={squares[0]} onSquareClick={() => handleClick(0)} />
-        <Square value={squares[1]} onSquareClick={() => handleClick(1)} />
-        <Square value={squares[2]} onSquareClick={() => handleClick(2)} />
+        <Square value={squares[0]} onSquareClick={() => handleClick(0)}/>
+        <Square value={squares[1]} onSquareClick={() => handleClick(1)}/>
+        <Square value={squares[2]} onSquareClick={() => handleClick(2)}/>
       </div>
       <div className="board-row">
-        <Square value={squares[3]} onSquareClick={() => handleClick(3)} />
-        <Square value={squares[4]} onSquareClick={() => handleClick(4)} />
-        <Square value={squares[5]} onSquareClick={() => handleClick(5)} />
+        <Square value={squares[3]} onSquareClick={() => handleClick(3)}/>
+        <Square value={squares[4]} onSquareClick={() => handleClick(4)}/>
+        <Square value={squares[5]} onSquareClick={() => handleClick(5)}/>
       </div>
       <div className="board-row">
-        <Square value={squares[6]} onSquareClick={() => handleClick(6)} />
-        <Square value={squares[7]} onSquareClick={() => handleClick(7)} />
-        <Square value={squares[8]} onSquareClick={() => handleClick(8)} />
+        <Square value={squares[6]} onSquareClick={() => handleClick(6)}/>
+        <Square value={squares[7]} onSquareClick={() => handleClick(7)}/>
+        <Square value={squares[8]} onSquareClick={() => handleClick(8)}/>
       </div>
       <div style={{color: "red", padding: "20px"}}>{statement}</div>
     </div>
   );
 }
 
-export function Square({ value, onSquareClick }) {
+export function Square({value, onSquareClick}) {
   return (
-    <button style={{backgroundColor: "black",
-    color: "white",
-    border: "1.5px solid grey",
-    width: "100px", 
-    height: "100px", 
-    fontSize: "50px",}} 
-    className="square" onClick={onSquareClick}>
+    <button style={{
+      backgroundColor: "black",
+      color: "white",
+      border: "1.5px solid grey",
+      width: "100px",
+      height: "100px",
+      fontSize: "50px",
+    }}
+            className="square" onClick={onSquareClick}>
       {value === 'N' ? null : value}
     </button>
   );
